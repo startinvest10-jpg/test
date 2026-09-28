@@ -1,0 +1,1029 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentSellerAI — AI System that sells 24/7</title>
+<meta name="description" content="Automate inquiry handling, lead qualification, and customer support. One AI agent replaces 3-5 sales reps.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07060f;
+  --bg-2:#0d0b1c;
+  --card:rgba(22,20,44,.55);
+  --card-solid:#12102a;
+  --line:rgba(255,255,255,.08);
+  --line-2:rgba(255,255,255,.14);
+  --text:#f4f3ff;
+  --muted:#a09cc0;
+  --dim:#6d6990;
+  --violet:#8b5cf6;
+  --indigo:#6366f1;
+  --cyan:#22d3ee;
+  --teal:#14b8a6;
+  --orange:#f97316;
+  --red:#ef4444;
+  --green:#22c55e;
+  --grad:linear-gradient(135deg,#a78bfa 0%,#6366f1 45%,#22d3ee 100%);
+  --grad-hot:linear-gradient(135deg,#fb923c 0%,#f43f5e 100%);
+  --radius:22px;
+  --maxw:1200px;
+  --display:"Space Grotesk",Inter,system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:Inter,system-ui,sans-serif;
+  background:var(--bg);color:var(--text);
+  line-height:1.6;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+h1,h2,h3,.display{font-family:var(--display);letter-spacing:-.02em;line-height:1.08}
+.container{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.grad-text{background:var(--grad);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradShift 6s ease infinite}
+.hot-text{background:var(--grad-hot);-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes gradShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* ---------- global FX ---------- */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:200;background:var(--grad);box-shadow:0 0 12px var(--violet)}
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55}
+.aurora{position:fixed;inset:-20%;z-index:0;pointer-events:none;filter:blur(90px);opacity:.55}
+.aurora span{position:absolute;border-radius:50%;mix-blend-mode:screen;animation:float 22s ease-in-out infinite}
+.aurora span:nth-child(1){width:48vw;height:48vw;left:5%;top:0;background:#4c1d95;animation-delay:0s}
+.aurora span:nth-child(2){width:40vw;height:40vw;right:0;top:20%;background:#1e3a8a;animation-delay:-7s}
+.aurora span:nth-child(3){width:36vw;height:36vw;left:30%;bottom:0;background:#7c2d12;opacity:.6;animation-delay:-14s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(6vw,-4vh) scale(1.1)}66%{transform:translate(-5vw,5vh) scale(.95)}}
+.noise{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+#cursor-glow{position:fixed;width:520px;height:520px;border-radius:50%;pointer-events:none;z-index:1;
+  background:radial-gradient(circle,rgba(139,92,246,.16),transparent 65%);transform:translate(-50%,-50%);left:-999px;top:-999px;transition:opacity .3s}
+main,header,footer{position:relative;z-index:2}
+
+/* ---------- nav ---------- */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;transition:all .35s}
+.nav .container{display:flex;align-items:center;justify-content:space-between;height:78px}
+.nav.scrolled{background:rgba(7,6,15,.72);backdrop-filter:blur(18px) saturate(1.4);border-bottom:1px solid var(--line)}
+.nav.scrolled .container{height:64px}
+.logo{font-family:var(--display);font-weight:700;font-size:1.45rem;display:flex;align-items:center;gap:10px}
+.logo-mark{width:34px;height:34px;border-radius:10px;background:var(--grad);display:grid;place-items:center;position:relative;box-shadow:0 0 24px rgba(139,92,246,.5)}
+.logo-mark::after{content:"";width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 12px #fff;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.6);opacity:.6}}
+.nav-links{display:flex;gap:6px}
+.nav-links a{padding:8px 14px;border-radius:999px;color:var(--muted);font-weight:500;font-size:.95rem;transition:.25s;position:relative}
+.nav-links a:hover,.nav-links a.active{color:var(--text);background:rgba(255,255,255,.06)}
+.burger{display:none;width:42px;height:42px;border-radius:12px;border:1px solid var(--line-2);position:relative}
+.burger span{position:absolute;left:11px;right:11px;height:2px;background:#fff;border-radius:2px;transition:.3s}
+.burger span:nth-child(1){top:14px}.burger span:nth-child(2){top:20px}.burger span:nth-child(3){top:26px}
+.burger.open span:nth-child(1){top:20px;transform:rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){top:20px;transform:rotate(-45deg)}
+.mobile-menu{position:fixed;inset:0;z-index:99;background:rgba(7,6,15,.96);backdrop-filter:blur(20px);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;opacity:0;pointer-events:none;transition:.35s}
+.mobile-menu.open{opacity:1;pointer-events:auto}
+.mobile-menu a{font-family:var(--display);font-size:2rem;font-weight:600;transform:translateY(20px);opacity:0;transition:.4s}
+.mobile-menu.open a{transform:none;opacity:1}
+.mobile-menu.open a:nth-child(2){transition-delay:.05s}.mobile-menu.open a:nth-child(3){transition-delay:.1s}
+.mobile-menu.open a:nth-child(4){transition-delay:.15s}.mobile-menu.open a:nth-child(5){transition-delay:.2s}
+.mobile-menu.open a:nth-child(6){transition-delay:.25s}.mobile-menu.open a:nth-child(7){transition-delay:.3s}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;gap:10px;padding:16px 28px;border-radius:999px;font-weight:600;font-size:1rem;position:relative;transition:transform .25s,box-shadow .25s;white-space:nowrap;will-change:transform}
+.btn-hot{background:var(--grad-hot);color:#fff;box-shadow:0 10px 40px -8px rgba(249,115,22,.6),inset 0 1px 0 rgba(255,255,255,.3);overflow:hidden}
+.btn-hot::before{content:"";position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-20deg);animation:shine 3.2s ease-in-out infinite}
+@keyframes shine{0%,60%{left:-100%}100%{left:160%}}
+.btn-hot:hover{box-shadow:0 16px 50px -6px rgba(249,115,22,.8)}
+.btn-ghost{border:1px solid var(--line-2);background:rgba(255,255,255,.04);backdrop-filter:blur(10px)}
+.btn-ghost:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.25)}
+.btn-sm{padding:11px 20px;font-size:.92rem}
+.btn .arrow{transition:transform .25s}
+.btn:hover .arrow{transform:translateX(4px)}
+
+/* ---------- section basics ---------- */
+section{padding:120px 0;position:relative}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border-radius:999px;border:1px solid rgba(139,92,246,.35);background:rgba(139,92,246,.1);font-size:.85rem;font-weight:500;color:#c4b5fd;margin-bottom:22px}
+.eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:pulse 1.8s infinite}
+.section-head{text-align:center;max-width:780px;margin:0 auto 64px}
+.section-head h2{font-size:clamp(2.1rem,4.6vw,3.6rem);margin-bottom:18px}
+.section-head p{color:var(--muted);font-size:1.15rem}
+
+/* reveal on scroll */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.reveal[data-d="1"]{transition-delay:.08s}.reveal[data-d="2"]{transition-delay:.16s}
+.reveal[data-d="3"]{transition-delay:.24s}.reveal[data-d="4"]{transition-delay:.32s}
+.reveal[data-d="5"]{transition-delay:.4s}
+
+/* glass card w/ spotlight */
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:32px;backdrop-filter:blur(14px);overflow:hidden;transition:border-color .3s,transform .3s}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(139,92,246,.18),transparent 45%)}
+.card::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;opacity:0;transition:opacity .35s;
+  background:radial-gradient(300px circle at var(--mx,50%) var(--my,50%),rgba(167,139,250,.9),transparent 55%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude}
+.card:hover::before,.card:hover::after{opacity:1}
+.tilt{transform-style:preserve-3d;will-change:transform}
+
+/* ---------- HERO ---------- */
+.hero{min-height:100vh;display:flex;align-items:center;padding:140px 0 80px}
+.hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:56px;align-items:center}
+.hero h1{font-size:clamp(2.4rem,5.2vw,4.4rem);font-weight:700;margin-bottom:26px}
+.rotator{display:inline-block;position:relative;min-width:3.2ch}
+.rotator .word{display:inline-block;background:var(--grad-hot);-webkit-background-clip:text;background-clip:text;color:transparent}
+.caret{display:inline-block;width:4px;height:.9em;background:var(--orange);margin-left:4px;vertical-align:-.08em;animation:blink 1s steps(1) infinite;border-radius:2px}
+@keyframes blink{50%{opacity:0}}
+.hero p.lead{font-size:1.2rem;color:var(--muted);max-width:560px;margin-bottom:30px}
+.hero p.lead b{color:var(--text);font-weight:600}
+.social-proof{display:flex;align-items:center;gap:16px;padding:14px 20px;border-radius:16px;background:rgba(20,184,166,.07);border:1px solid rgba(20,184,166,.22);margin-bottom:32px;max-width:560px}
+.avatars{display:flex}
+.avatars span{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.85rem;border:2px solid var(--bg);margin-left:-10px;background:var(--grad)}
+.avatars span:first-child{margin-left:0}
+.avatars span:nth-child(2){background:linear-gradient(135deg,#f472b6,#8b5cf6)}
+.avatars span:nth-child(3){background:linear-gradient(135deg,#22d3ee,#6366f1)}
+.avatars span:nth-child(4){background:linear-gradient(135deg,#fb923c,#f43f5e)}
+.social-proof b{color:#2dd4bf}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:38px;max-width:580px}
+.stat .num{font-family:var(--display);font-size:2.35rem;font-weight:700;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1}
+.stat .lbl{color:var(--dim);font-size:.85rem}
+.hero-ctas{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:40px}
+.integrates{display:flex;align-items:center;gap:18px;padding-top:26px;border-top:1px solid var(--line);color:var(--dim);font-size:.9rem;flex-wrap:wrap}
+.integrates .ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:1.15rem;transition:.3s}
+.integrates .ic:hover{transform:translateY(-4px) scale(1.08);border-color:rgba(139,92,246,.5);box-shadow:0 10px 24px -8px rgba(139,92,246,.6)}
+
+/* chat demo */
+.chat-wrap{position:relative;perspective:1400px}
+.chat{position:relative;border-radius:28px;background:linear-gradient(180deg,rgba(24,22,50,.85),rgba(12,11,28,.9));border:1px solid var(--line-2);box-shadow:0 40px 120px -20px rgba(99,102,241,.45),0 0 0 1px rgba(255,255,255,.03) inset;overflow:hidden;transform:rotateY(-8deg) rotateX(4deg);transition:transform .6s}
+.chat-wrap:hover .chat{transform:rotateY(0) rotateX(0)}
+.chat-head{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+.chat-ava{width:42px;height:42px;border-radius:14px;background:var(--grad);display:grid;place-items:center;font-size:1.25rem;position:relative}
+.chat-ava::after{content:"";position:absolute;right:-2px;bottom:-2px;width:12px;height:12px;border-radius:50%;background:var(--green);border:2px solid #16142f}
+.chat-head .t{font-weight:600}.chat-head .s{font-size:.8rem;color:#4ade80}
+.chat-channels{margin-left:auto;display:flex;gap:6px}
+.chat-channels span{font-size:.72rem;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted);transition:.3s}
+.chat-channels span.on{background:rgba(139,92,246,.25);color:#ddd6fe}
+.chat-body{height:390px;padding:22px;display:flex;flex-direction:column;gap:12px;overflow:hidden;justify-content:flex-end}
+.msg{max-width:82%;padding:12px 16px;border-radius:18px;font-size:.93rem;line-height:1.45;animation:msgIn .45s cubic-bezier(.2,.9,.3,1.3) both}
+.msg.user{align-self:flex-end;background:rgba(255,255,255,.08);border-bottom-right-radius:6px}
+.msg.bot{align-self:flex-start;background:linear-gradient(135deg,rgba(139,92,246,.35),rgba(99,102,241,.25));border:1px solid rgba(167,139,250,.25);border-bottom-left-radius:6px}
+.msg.sys{align-self:center;font-size:.78rem;padding:6px 14px;border-radius:999px;background:rgba(34,197,94,.12);color:#86efac;border:1px solid rgba(34,197,94,.25)}
+@keyframes msgIn{from{opacity:0;transform:translateY(16px) scale(.94)}to{opacity:1;transform:none}}
+.typing{display:flex;gap:5px;padding:14px 18px}
+.typing i{width:7px;height:7px;border-radius:50%;background:#c4b5fd;animation:bounce 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-6px);opacity:1}}
+.chat-foot{display:flex;gap:10px;padding:16px 22px;border-top:1px solid var(--line)}
+.chat-foot .in{flex:1;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--dim);font-size:.9rem}
+.chat-foot .send{width:44px;border-radius:14px;background:var(--grad-hot);display:grid;place-items:center}
+.float-badge{position:absolute;padding:12px 16px;border-radius:16px;background:rgba(18,16,40,.9);border:1px solid var(--line-2);backdrop-filter:blur(12px);font-size:.85rem;display:flex;align-items:center;gap:10px;box-shadow:0 20px 50px -10px rgba(0,0,0,.6);animation:bob 5s ease-in-out infinite;z-index:3}
+.float-badge b{display:block;font-size:1.05rem}
+.float-badge .ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:1rem}
+.fb-1{top:90px;left:-40px}.fb-1 .ico{background:rgba(34,197,94,.18)}
+.fb-2{bottom:60px;right:-30px;animation-delay:-2.5s}.fb-2 .ico{background:rgba(249,115,22,.18)}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+/* ---------- trust bar ---------- */
+.trust{padding:0}
+.trust-inner{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding:30px;border-radius:var(--radius);background:rgba(255,255,255,.025);border:1px solid var(--line)}
+.trust-item{display:flex;align-items:center;gap:14px}
+.trust-item .ico{flex:none;width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:1.3rem;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.trust-item b{display:block;font-size:.98rem}
+.trust-item span{font-size:.84rem;color:var(--dim)}
+
+/* ---------- problems ---------- */
+.eyebrow.warn{border-color:rgba(249,115,22,.35);background:rgba(249,115,22,.1);color:#fdba74}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.problem{padding:34px}
+.problem .bar{position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad-hot);transform:scaleX(0);transform-origin:left;transition:transform 1.1s cubic-bezier(.2,.7,.2,1) .3s}
+.problem.in .bar{transform:scaleX(1)}
+.emoji{font-size:2.6rem;margin-bottom:22px;display:inline-block;transition:transform .4s cubic-bezier(.2,.9,.3,1.5)}
+.card:hover .emoji{transform:scale(1.2) rotate(-8deg)}
+.problem h3{font-size:1.35rem;margin-bottom:12px}
+.problem p{color:var(--muted);margin-bottom:22px}
+.pill{display:inline-block;padding:7px 14px;border-radius:999px;font-size:.85rem;font-weight:600}
+.pill.red{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.25)}
+
+/* ---------- before/after ---------- */
+.compare{display:grid;grid-template-columns:1fr auto 1fr;gap:28px;align-items:stretch;margin-top:70px}
+.compare .col{padding:36px}
+.compare h3{font-size:1.5rem;margin-bottom:22px;display:flex;align-items:center;gap:10px}
+.compare ul{list-style:none;display:grid;gap:14px}
+.compare li{display:flex;gap:12px;color:var(--muted)}
+.compare li i{font-style:normal;flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:.8rem;font-weight:700}
+.col.before li i{background:rgba(239,68,68,.15);color:#f87171}
+.col.after{border-color:rgba(34,197,94,.3);background:linear-gradient(180deg,rgba(34,197,94,.08),var(--card))}
+.col.after li i{background:rgba(34,197,94,.15);color:#4ade80}
+.col.after li{color:var(--text)}
+.vs{align-self:center;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;background:var(--grad);box-shadow:0 0 40px rgba(139,92,246,.6);animation:spinPulse 4s ease-in-out infinite}
+@keyframes spinPulse{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.12) rotate(180deg)}}
+
+/* ---------- modules (bento) ---------- */
+.eyebrow.teal{border-color:rgba(34,211,238,.35);background:rgba(34,211,238,.08);color:#67e8f9}
+.bento{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.module{display:flex;flex-direction:column}
+.module.big{grid-column:span 2;background:linear-gradient(135deg,rgba(139,92,246,.18),rgba(34,211,238,.06) 60%,var(--card))}
+.module h3{font-size:1.3rem;margin-bottom:10px}
+.module p{color:var(--muted);margin-bottom:22px;flex:1}
+.module .more{color:var(--cyan);font-weight:600;font-size:.95rem;display:inline-flex;gap:6px;align-items:center}
+.module .more span{transition:transform .25s}
+.module:hover .more span{transform:translateX(5px)}
+.tag{position:absolute;top:24px;right:24px;padding:6px 12px;border-radius:999px;font-size:.75rem;font-weight:700;background:linear-gradient(135deg,#14b8a6,#22d3ee);color:#042f2e;box-shadow:0 0 20px rgba(20,184,166,.5)}
+.brain-viz{display:flex;gap:6px;align-items:flex-end;height:54px;margin-bottom:18px}
+.brain-viz i{flex:1;border-radius:4px;background:var(--grad);animation:eq 1.6s ease-in-out infinite;opacity:.85}
+@keyframes eq{0%,100%{height:20%}50%{height:100%}}
+
+/* ---------- platforms orbit ---------- */
+#platforms{overflow:hidden}
+.platforms{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.orbit{position:relative;aspect-ratio:1;max-width:520px;width:100%;margin:0 auto}
+.orbit .ring{position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(167,139,250,.25)}
+.orbit .ring.r2{inset:17%;border-color:rgba(34,211,238,.2)}
+.orbit .core{position:absolute;inset:35%;border-radius:50%;background:var(--grad);display:grid;place-items:center;font-size:3rem;box-shadow:0 0 80px rgba(139,92,246,.7),0 0 160px rgba(34,211,238,.25)}
+.orbit .core::before,.orbit .core::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:2px solid rgba(167,139,250,.5);animation:ripple 2.8s ease-out infinite}
+.orbit .core::after{animation-delay:1.4s}
+@keyframes ripple{from{transform:scale(.85);opacity:1}to{transform:scale(1.6);opacity:0}}
+.orbit .spin{position:absolute;inset:0;animation:rot 40s linear infinite}
+.orbit .spin.rev{inset:17%;animation:rot 28s linear infinite reverse}
+@keyframes rot{to{transform:rotate(360deg)}}
+.planet{position:absolute;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:20px;display:grid;place-items:center;font-size:1.7rem;background:rgba(18,16,40,.92);border:1px solid var(--line-2);box-shadow:0 10px 30px -6px rgba(0,0,0,.6)}
+.planet>span{display:block;animation:rot 40s linear infinite reverse}
+.spin.rev .planet>span{animation:rot 28s linear infinite}
+.platform-list{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:34px}
+.platform-list .p{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--line);transition:.3s;font-weight:500}
+.platform-list .p:hover{border-color:rgba(139,92,246,.5);transform:translateX(6px);background:rgba(139,92,246,.08)}
+.platform-list .p span{font-size:1.3rem}
+
+/* marquee */
+.marquee{overflow:hidden;padding:26px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.marquee .track{display:flex;gap:56px;width:max-content;animation:marq 30s linear infinite}
+.marquee:hover .track{animation-play-state:paused}
+.marquee .item{display:flex;align-items:center;gap:12px;font-family:var(--display);font-size:1.4rem;font-weight:600;color:var(--dim);white-space:nowrap;transition:color .3s}
+.marquee .item:hover{color:var(--text)}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* ---------- dashboard ---------- */
+.dash{padding:0;overflow:hidden}
+.dash-top{display:flex;align-items:center;justify-content:space-between;padding:24px 30px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:12px}
+.dash-top h3{font-size:1.4rem;display:flex;gap:10px;align-items:center}
+.live{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:999px;background:linear-gradient(135deg,#14b8a6,#22d3ee);color:#042f2e;font-weight:700;font-size:.85rem}
+.live i{width:8px;height:8px;border-radius:50%;background:#042f2e;animation:pulse 1.2s infinite}
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}
+.kpi{padding:24px 30px;border-right:1px solid var(--line)}
+.kpi:last-child{border-right:0}
+.kpi .l{color:var(--dim);font-size:.85rem;margin-bottom:6px}
+.kpi .v{font-family:var(--display);font-size:2rem;font-weight:700}
+.kpi .d{font-size:.8rem;color:#4ade80;font-weight:600}
+.dash-body{display:grid;grid-template-columns:1.6fr 1fr}
+.chart{padding:26px 30px;border-right:1px solid var(--line)}
+.chart .ct{display:flex;justify-content:space-between;color:var(--muted);font-size:.9rem;margin-bottom:12px}
+.chart svg{width:100%;height:230px;overflow:visible}
+.chart .line{fill:none;stroke:url(#lg);stroke-width:3;stroke-linecap:round;stroke-dasharray:1400;stroke-dashoffset:1400;transition:stroke-dashoffset 2.4s cubic-bezier(.4,0,.2,1)}
+.chart .area{fill:url(#ag);opacity:0;transition:opacity 1.2s 1.2s}
+.chart.in .line{stroke-dashoffset:0}.chart.in .area{opacity:1}
+.feed{padding:26px 24px;display:flex;flex-direction:column;gap:10px;max-height:320px;overflow:hidden}
+.feed .ft{color:var(--muted);font-size:.9rem;margin-bottom:4px}
+.lead-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);animation:msgIn .5s both}
+.lead-item .av{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:1rem;background:rgba(255,255,255,.06)}
+.lead-item .n{font-weight:600;font-size:.9rem}.lead-item .c{font-size:.78rem;color:var(--dim)}
+.score{margin-left:auto;font-size:.75rem;font-weight:700;padding:4px 10px;border-radius:999px}
+.score.hot{background:rgba(249,115,22,.15);color:#fb923c}
+.score.warm{background:rgba(234,179,8,.14);color:#facc15}
+.score.cold{background:rgba(34,211,238,.12);color:#67e8f9}
+
+/* ---------- ROI calc ---------- */
+.roi{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.roi .card{padding:38px}
+.field{margin-bottom:30px}
+.field label{display:flex;justify-content:space-between;margin-bottom:14px;font-weight:500}
+.field label output{font-family:var(--display);font-weight:700;color:#c4b5fd;font-size:1.15rem}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:999px;background:linear-gradient(90deg,var(--violet) var(--p,50%),rgba(255,255,255,.08) var(--p,50%));outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;border:5px solid var(--violet);box-shadow:0 0 0 6px rgba(139,92,246,.2),0 4px 14px rgba(0,0,0,.4);cursor:grab;transition:transform .2s}
+input[type=range]::-webkit-slider-thumb:active{transform:scale(1.2);cursor:grabbing}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:5px solid var(--violet);cursor:grab}
+.roi-result{display:flex;flex-direction:column;justify-content:center;text-align:center;background:linear-gradient(160deg,rgba(34,197,94,.14),rgba(20,184,166,.05) 50%,var(--card));border-color:rgba(34,197,94,.3)}
+.roi-result .big{font-family:var(--display);font-size:clamp(3rem,7vw,5rem);font-weight:700;background:linear-gradient(135deg,#4ade80,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1;margin:10px 0}
+.roi-result .sub{color:var(--muted)}
+.roi-split{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:30px 0}
+.roi-split div{padding:18px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.roi-split b{display:block;font-family:var(--display);font-size:1.5rem}
+.roi-split span{font-size:.82rem;color:var(--dim)}
+
+/* ---------- steps ---------- */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;position:relative}
+.steps-line{position:absolute;top:44px;left:16%;right:16%;height:2px;background:var(--line)}
+.steps-line i{position:absolute;inset:0;background:var(--grad);transform:scaleX(0);transform-origin:left;transition:transform 1.8s cubic-bezier(.4,0,.2,1)}
+.steps.in .steps-line i{transform:scaleX(1)}
+.step{text-align:center;padding:0 12px}
+.step .n{width:88px;height:88px;margin:0 auto 26px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-size:2rem;font-weight:700;background:var(--bg-2);border:2px solid rgba(139,92,246,.4);position:relative;z-index:1;box-shadow:0 0 0 8px var(--bg),0 0 40px rgba(139,92,246,.35)}
+.step h3{font-size:1.3rem;margin-bottom:10px}
+.step p{color:var(--muted)}
+
+/* ---------- reviews ---------- */
+.reviews-track{display:flex;gap:22px;width:max-content;animation:marq 55s linear infinite}
+.reviews-row{overflow:hidden;-webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);padding:10px 0}
+.reviews-row:hover .reviews-track{animation-play-state:paused}
+.reviews-row.rev .reviews-track{animation-direction:reverse}
+.review{width:380px;flex:none;padding:28px}
+.stars{color:#fbbf24;letter-spacing:3px;margin-bottom:14px}
+.review p{color:var(--muted);margin-bottom:20px}
+.who{display:flex;align-items:center;gap:12px}
+.who .a{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:var(--grad)}
+.who b{display:block;font-size:.95rem}.who span{font-size:.8rem;color:var(--dim)}
+
+/* ---------- pricing ---------- */
+.toggle{display:inline-flex;padding:6px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--line);position:relative;margin-top:10px}
+.toggle button{position:relative;z-index:1;padding:10px 22px;border-radius:999px;font-weight:600;color:var(--muted);transition:color .3s}
+.toggle button.on{color:#fff}
+.toggle .knob{position:absolute;top:6px;bottom:6px;left:6px;border-radius:999px;background:var(--grad);transition:all .4s cubic-bezier(.3,1.3,.5,1)}
+.save{font-size:.72rem;padding:3px 8px;border-radius:999px;background:rgba(34,197,94,.2);color:#4ade80;margin-left:6px}
+.pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch}
+.plan{display:flex;flex-direction:column;padding:38px}
+.plan h3{font-size:1.35rem;margin-bottom:6px}
+.plan .desc{color:var(--dim);font-size:.92rem;margin-bottom:24px}
+.price{font-family:var(--display);font-size:3.2rem;font-weight:700;line-height:1;margin-bottom:6px;display:flex;align-items:baseline;gap:6px}
+.price small{font-size:1rem;color:var(--dim);font-weight:500}
+.price .val{display:inline-block;transition:transform .35s,opacity .35s}
+.price .val.flip{transform:translateY(-12px);opacity:0}
+.plan .billed{font-size:.82rem;color:var(--dim);margin-bottom:26px;min-height:1.3em}
+.plan ul{list-style:none;display:grid;gap:12px;margin-bottom:32px;flex:1}
+.plan li{display:flex;gap:10px;color:var(--muted);font-size:.95rem}
+.plan li::before{content:"✓";flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;font-weight:700;background:rgba(139,92,246,.18);color:#c4b5fd}
+.plan .btn{justify-content:center}
+.plan.pop{border:0;background:linear-gradient(var(--card-solid),var(--card-solid)) padding-box,conic-gradient(from var(--ang,0deg),#8b5cf6,#22d3ee,#f97316,#8b5cf6) border-box;border:2px solid transparent;transform:scale(1.04);box-shadow:0 30px 90px -20px rgba(139,92,246,.5);animation:angle 5s linear infinite}
+@property --ang{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes angle{to{--ang:360deg}}
+.plan.pop .ribbon{position:absolute;top:22px;right:22px;padding:6px 12px;border-radius:999px;font-size:.75rem;font-weight:700;background:var(--grad-hot)}
+
+/* ---------- FAQ ---------- */
+.faq{max-width:820px;margin:0 auto;display:grid;gap:14px}
+.qa{border-radius:18px;border:1px solid var(--line);background:var(--card);transition:border-color .3s,background .3s}
+.qa.open{border-color:rgba(139,92,246,.45);background:rgba(139,92,246,.07)}
+.qa button{width:100%;text-align:left;padding:22px 26px;display:flex;justify-content:space-between;align-items:center;gap:16px;font-weight:600;font-size:1.05rem}
+.qa .pm{flex:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--line-2);position:relative;transition:transform .4s,background .3s}
+.qa .pm::before,.qa .pm::after{content:"";position:absolute;left:50%;top:50%;width:12px;height:2px;background:#fff;transform:translate(-50%,-50%);border-radius:2px}
+.qa .pm::after{transform:translate(-50%,-50%) rotate(90deg);transition:transform .4s}
+.qa.open .pm{transform:rotate(180deg);background:var(--violet);border-color:var(--violet)}
+.qa.open .pm::after{transform:translate(-50%,-50%) rotate(0)}
+.qa .ans{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.2,.7,.2,1)}
+.qa.open .ans{grid-template-rows:1fr}
+.qa .ans>div{overflow:hidden}
+.qa .ans p{padding:0 26px 24px;color:var(--muted)}
+
+/* ---------- final CTA ---------- */
+.final{text-align:center;padding:90px 40px;border-radius:36px;position:relative;overflow:hidden;background:radial-gradient(ellipse at top,rgba(139,92,246,.35),transparent 60%),radial-gradient(ellipse at bottom right,rgba(249,115,22,.22),transparent 55%),var(--card-solid);border:1px solid var(--line-2)}
+.final h2{font-size:clamp(2.2rem,5vw,4rem);margin-bottom:20px}
+.final p{color:var(--muted);font-size:1.15rem;max-width:620px;margin:0 auto 36px}
+.final .grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:44px 44px;-webkit-mask:radial-gradient(ellipse at center,#000 20%,transparent 70%);mask:radial-gradient(ellipse at center,#000 20%,transparent 70%);animation:gridMove 12s linear infinite}
+@keyframes gridMove{to{background-position:44px 44px}}
+.final>*:not(.grid-bg){position:relative}
+.guarantee{margin-top:24px;color:var(--dim);font-size:.9rem}
+
+footer{padding:60px 0 40px;border-top:1px solid var(--line);margin-top:60px}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;color:var(--dim);font-size:.9rem}
+.foot nav{display:flex;gap:22px;flex-wrap:wrap}
+.foot nav a:hover{color:var(--text)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1024px){
+  .hero-grid,.platforms,.roi{grid-template-columns:minmax(0,1fr)}
+  .chat{transform:none}
+  .grid-3,.bento,.pricing{grid-template-columns:1fr 1fr}
+  .module.big{grid-column:span 2}
+  .dash-grid{grid-template-columns:1fr 1fr}
+  .kpi:nth-child(2){border-right:0}
+  .kpi:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .dash-body{grid-template-columns:1fr}
+  .chart{border-right:0;border-bottom:1px solid var(--line)}
+  .trust-inner{grid-template-columns:1fr 1fr}
+  .plan.pop{transform:none}
+}
+@media (max-width:760px){
+  section{padding:84px 0}
+  .container{padding:0 16px}
+  .nav-links,.nav .btn{display:none}
+  .burger{display:block}
+  .hero{padding-top:110px}
+  .stats{grid-template-columns:1fr 1fr}
+  .grid-3,.bento,.pricing,.steps,.trust-inner{grid-template-columns:1fr}
+  .module.big{grid-column:auto}
+  .compare{grid-template-columns:1fr}
+  .vs{justify-self:center}
+  .steps-line{display:none}
+  .fb-1{left:-6px}.fb-2{right:-6px}
+  .float-badge{font-size:.78rem;padding:10px 12px}
+  .chat-channels{display:none}
+  .review{width:300px}
+  .roi-split{grid-template-columns:1fr}
+  .platform-list{grid-template-columns:1fr}
+  .hero-ctas .btn,.final .btn{width:100%;justify-content:center;white-space:normal;text-align:center}
+  .final{padding:64px 22px;border-radius:26px}
+  #cursor-glow{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="aurora"><span></span><span></span><span></span></div>
+<canvas id="particles"></canvas>
+<div class="noise"></div>
+<div id="cursor-glow"></div>
+
+<!-- ============ NAV ============ -->
+<header class="nav" id="nav">
+  <div class="container">
+    <a href="#top" class="logo"><span class="logo-mark"></span><span class="grad-text">AgentSellerAI</span></a>
+    <nav class="nav-links">
+      <a href="#solution">Solution</a>
+      <a href="#modules">Modules</a>
+      <a href="#roi">ROI</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a href="#pricing" class="btn btn-hot btn-sm magnetic">Get the System <span class="arrow">→</span></a>
+    <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#solution">Solution</a>
+  <a href="#modules">Modules</a>
+  <a href="#roi">ROI</a>
+  <a href="#reviews">Reviews</a>
+  <a href="#pricing">Pricing</a>
+  <a href="#faq">FAQ</a>
+  <a href="#pricing" class="btn btn-hot">Get the System →</a>
+</div>
+
+<main id="top">
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow reveal"><span class="dot"></span>Next-generation AI sales automation</div>
+      <h1 class="reveal" data-d="1"><span class="grad-text">AI System</span> that<br><span class="rotator"><span class="word" id="rotWord">sells</span><span class="caret"></span></span> 24/7 instead<br>of your sales reps</h1>
+      <p class="lead reveal" data-d="2">Automate inquiry handling, lead qualification, and customer support. <b>One AI agent replaces 3-5 sales reps</b> and works without weekends, sick days, or vacations.</p>
+      <div class="social-proof reveal" data-d="3">
+        <div class="avatars"><span>J</span><span>M</span><span>S</span><span>+</span></div>
+        <div><b><span class="count" data-to="50">0</span>+ businesses</b> already automated their sales</div>
+      </div>
+      <div class="stats reveal" data-d="3">
+        <div class="stat"><div class="num"><span class="count" data-to="100">0</span>%</div><div class="lbl">inquiries handled</div></div>
+        <div class="stat"><div class="num">24/7</div><div class="lbl">no days off</div></div>
+        <div class="stat"><div class="num">&lt;<span class="count" data-to="30">0</span>s</div><div class="lbl">response time</div></div>
+        <div class="stat"><div class="num"><span class="count" data-to="11">0</span></div><div class="lbl">languages</div></div>
+      </div>
+      <div class="hero-ctas reveal" data-d="4">
+        <a href="#pricing" class="btn btn-hot magnetic">Yes, I want to automate my sales! <span class="arrow">→</span></a>
+        <a href="#demo" class="btn btn-ghost magnetic">▶ Watch Demo</a>
+      </div>
+      <div class="integrates reveal" data-d="5">Integrates with:
+        <span class="ic" title="Telegram">✈️</span><span class="ic" title="Instagram">📸</span><span class="ic" title="Email">✉️</span><span class="ic" title="Web">🌐</span><span class="ic" title="CRM">📊</span><span class="ic" title="WhatsApp">💬</span>
+      </div>
+    </div>
+
+    <div class="chat-wrap reveal" data-d="2" id="demo">
+      <div class="float-badge fb-1"><span class="ico">✅</span><div><b>Lead qualified</b>BANT score 92/100</div></div>
+      <div class="float-badge fb-2"><span class="ico">⚡</span><div><b>Replied in 4s</b>at 03:12 AM</div></div>
+      <div class="chat">
+        <div class="chat-head">
+          <div class="chat-ava">🤖</div>
+          <div><div class="t">AI Sales Agent</div><div class="s">● Online — always</div></div>
+          <div class="chat-channels" id="chatChannels"><span class="on">Telegram</span><span>Instagram</span><span>Web</span></div>
+        </div>
+        <div class="chat-body" id="chatBody"></div>
+        <div class="chat-foot"><div class="in">Type a message…</div><div class="send">➤</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRUST ============ -->
+<section class="trust">
+  <div class="container">
+    <div class="trust-inner reveal">
+      <div class="trust-item"><span class="ico">🛡️</span><div><b>14-Day Guarantee</b><span>Full refund if not satisfied</span></div></div>
+      <div class="trust-item"><span class="ico">⚡</span><div><b>3-Step Setup</b><span>Quick system launch</span></div></div>
+      <div class="trust-item"><span class="ico">💬</span><div><b>24/7 Support</b><span>Always available</span></div></div>
+      <div class="trust-item"><span class="ico">🔒</span><div><b>GDPR Compliant</b><span>Data security</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PROBLEMS ============ -->
+<section id="solution">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow warn">⚠️ Business Problems</div>
+      <h2>Sound familiar? <span class="hot-text">You're losing money</span> every day</h2>
+      <p>While you're reading this, your competitors have already automated their sales</p>
+    </div>
+    <div class="grid-3">
+      <div class="card problem tilt reveal" data-d="1"><div class="bar"></div><div class="emoji">😴</div><h3>Sales reps sleep — leads leave</h3><p>At night, on weekends and holidays, inquiries go unanswered. Customers don't wait — they go to competitors who responded first.</p><span class="pill red">-67% conversion at night</span></div>
+      <div class="card problem tilt reveal" data-d="2"><div class="bar"></div><div class="emoji">⏱️</div><h3>Slow response time</h3><p>Average sales rep response time is 2-4 hours. By then, the customer has compared 5 offers and made a decision without you.</p><span class="pill red">78% went to competitors</span></div>
+      <div class="card problem tilt reveal" data-d="3"><div class="bar"></div><div class="emoji">💸</div><h3>Expensive sales reps</h3><p>Salaries, taxes, training, turnover. One sales rep costs $1,500-2,500/month, yet handles only 30-50 conversations per day.</p><span class="pill red">×2 with taxes and office</span></div>
+      <div class="card problem tilt reveal" data-d="1"><div class="bar"></div><div class="emoji">🤷</div><h3>Inconsistent quality</h3><p>Mood, fatigue, personal problems — everything affects work quality. Each sales rep communicates differently.</p><span class="pill red">40% conversion variance</span></div>
+      <div class="card problem tilt reveal" data-d="2"><div class="bar"></div><div class="emoji">📉</div><h3>Data loss</h3><p>Conversations in personal messengers, forgotten agreements, lost contacts. Analytics? What analytics?</p><span class="pill red">35% of leads lost</span></div>
+      <div class="card problem tilt reveal" data-d="3"><div class="bar"></div><div class="emoji">🌍</div><h3>Language barrier</h3><p>International customers write in German, Spanish, French. You need a translator or they leave.</p><span class="pill red">-89% international sales</span></div>
+    </div>
+
+    <div class="compare">
+      <div class="card col before reveal">
+        <h3>😩 Without AgentSellerAI</h3>
+        <ul>
+          <li><i>✕</i>Leads wait hours for a reply</li>
+          <li><i>✕</i>Nights and weekends — zero sales</li>
+          <li><i>✕</i>$1,500-2,500/month per sales rep</li>
+          <li><i>✕</i>Conversations lost in personal chats</li>
+          <li><i>✕</i>Only 1-2 languages supported</li>
+        </ul>
+      </div>
+      <div class="vs reveal">VS</div>
+      <div class="card col after reveal" data-d="2">
+        <h3>🚀 With AgentSellerAI</h3>
+        <ul>
+          <li><i>✓</i>Reply in under 30 seconds</li>
+          <li><i>✓</i>Sells 24/7/365, no days off</li>
+          <li><i>✓</i>One agent replaces 3-5 sales reps</li>
+          <li><i>✓</i>Every dialogue saved to CRM</li>
+          <li><i>✓</i>11 languages out of the box</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MODULES ============ -->
+<section id="modules">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow teal">🧩 9 Modules</div>
+      <h2>Everything you need for <span class="grad-text">sales automation</span></h2>
+      <p>Each module solves a specific task and works within a unified ecosystem</p>
+    </div>
+    <div class="bento">
+      <div class="card module big tilt reveal">
+        <span class="tag">System Core</span>
+        <div class="brain-viz"><i style="animation-delay:0s"></i><i style="animation-delay:.15s"></i><i style="animation-delay:.3s"></i><i style="animation-delay:.45s"></i><i style="animation-delay:.6s"></i><i style="animation-delay:.75s"></i><i style="animation-delay:.9s"></i><i style="animation-delay:1.05s"></i><i style="animation-delay:1.2s"></i><i style="animation-delay:.2s"></i><i style="animation-delay:.5s"></i><i style="animation-delay:.8s"></i></div>
+        <div class="emoji">🧠</div>
+        <h3>AI Core Sales Agent</h3>
+        <p>Central AI agent on Google Gemini. Conducts dialogues, qualifies leads, answers questions — in the tone of your brand.</p>
+        <a href="#" class="more">Learn more <span>→</span></a>
+      </div>
+      <div class="card module tilt reveal" data-d="1"><div class="emoji">🔌</div><h3>Platform Adapters</h3><p>Adapters for Telegram, Instagram, Facebook, Web Chat. Single AI for all channels.</p><a href="#" class="more">Learn more <span>→</span></a></div>
+      <div class="card module tilt reveal" data-d="1"><div class="emoji">📊</div><h3>AI Monitoring System</h3><p>Real-time dashboards. Lead scoring, BANT analysis, dialogue analytics.</p><a href="#" class="more">Learn more <span>→</span></a></div>
+      <div class="card module tilt reveal" data-d="2"><div class="emoji">🎓</div><h3>AI Self-Learning</h3><p>Automatic AI improvement based on dialogues. The system gets smarter every day.</p><a href="#" class="more">Learn more <span>→</span></a></div>
+      <div class="card module tilt reveal" data-d="3"><div class="emoji">🗄️</div><h3>RAG Vector Base</h3><p>Web interface for managing AI knowledge bases. Add information about products and services.</p><a href="#" class="more">Learn more <span>→</span></a></div>
+      <div class="card module tilt reveal" data-d="1"><div class="emoji">📧</div><h3>Email Automation</h3><p>7 workflows for email marketing. AI responses, follow-up sequences, lead nurturing.</p><a href="#" class="more">Learn more <span>→</span></a></div>
+      <div class="card module tilt reveal" data-d="2"><div class="emoji">📈</div><h3>CRM Integration</h3><p>Integration with HubSpot, Pipedrive, Salesforce. Automatic deal and contact creation.</p><a href="#" class="more">Learn more <span>→</span></a></div>
+      <div class="card module tilt reveal" data-d="3"><div class="emoji">🛡️</div><h3>GDPR Compliance</h3><p>Full GDPR compliance. Consents, right to deletion, data export, audit.</p><a href="#" class="more">Learn more <span>→</span></a></div>
+      <div class="card module tilt reveal" data-d="4"><div class="emoji">👤</div><h3>Admin User Management</h3><p>User and access management. JWT authorization, roles, bcrypt hashing.</p><a href="#" class="more">Learn more <span>→</span></a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PLATFORMS ============ -->
+<section id="platforms">
+  <div class="container platforms">
+    <div class="reveal">
+      <div class="eyebrow">🌐 Omnichannel</div>
+      <h2 style="font-size:clamp(2.1rem,4.4vw,3.4rem);margin-bottom:18px">One brain.<br><span class="grad-text">Every channel.</span></h2>
+      <p style="color:var(--muted);font-size:1.15rem">AI agent works where your customers are. Same knowledge, same tone, same speed — in every messenger.</p>
+      <div class="platform-list">
+        <div class="p"><span>✈️</span>Telegram Bot</div>
+        <div class="p"><span>📸</span>Instagram Direct</div>
+        <div class="p"><span>📘</span>Facebook Messenger</div>
+        <div class="p"><span>🌐</span>Web Chat Widget</div>
+        <div class="p"><span>🎵</span>TikTok</div>
+        <div class="p"><span>💬</span>WhatsApp</div>
+      </div>
+    </div>
+    <div class="orbit reveal" data-d="2">
+      <div class="ring"></div><div class="ring r2"></div>
+      <div class="spin">
+        <div class="planet" style="left:50%;top:0%"><span>✈️</span></div>
+        <div class="planet" style="left:93.3%;top:75%"><span>📸</span></div>
+        <div class="planet" style="left:6.7%;top:75%"><span>📘</span></div>
+      </div>
+      <div class="spin rev">
+        <div class="planet" style="left:50%;top:100%"><span>🌐</span></div>
+        <div class="planet" style="left:6.7%;top:25%"><span>🎵</span></div>
+        <div class="planet" style="left:93.3%;top:25%"><span>💬</span></div>
+      </div>
+      <div class="core">🧠</div>
+    </div>
+  </div>
+  <div class="marquee" style="margin-top:90px">
+    <div class="track">
+      <div class="item">✈️ Telegram</div><div class="item">📸 Instagram</div><div class="item">📘 Messenger</div><div class="item">💬 WhatsApp</div><div class="item">🎵 TikTok</div><div class="item">🌐 Web Chat</div><div class="item">🟠 HubSpot</div><div class="item">🟢 Pipedrive</div><div class="item">☁️ Salesforce</div><div class="item">✨ Gemini</div>
+      <div class="item">✈️ Telegram</div><div class="item">📸 Instagram</div><div class="item">📘 Messenger</div><div class="item">💬 WhatsApp</div><div class="item">🎵 TikTok</div><div class="item">🌐 Web Chat</div><div class="item">🟠 HubSpot</div><div class="item">🟢 Pipedrive</div><div class="item">☁️ Salesforce</div><div class="item">✨ Gemini</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DASHBOARD ============ -->
+<section id="monitoring" style="padding-top:40px">
+  <div class="container">
+    <div class="card dash reveal">
+      <div class="dash-top">
+        <h3>📊 Real-time Monitoring System</h3>
+        <span class="live"><i></i>Live Dashboard</span>
+      </div>
+      <div class="dash-grid">
+        <div class="kpi"><div class="l">Conversations today</div><div class="v" id="kpiConv">1,284</div><div class="d">▲ 18% vs yesterday</div></div>
+        <div class="kpi"><div class="l">Qualified leads</div><div class="v" id="kpiLeads">312</div><div class="d">▲ 24%</div></div>
+        <div class="kpi"><div class="l">Avg. response</div><div class="v">4.2s</div><div class="d">▼ 0.8s faster</div></div>
+        <div class="kpi"><div class="l">Conversion</div><div class="v">27.4%</div><div class="d">▲ 3.1 pts</div></div>
+      </div>
+      <div class="dash-body">
+        <div class="chart" id="chart">
+          <div class="ct"><span>Qualified leads · last 14 days</span><span style="color:#4ade80">+212%</span></div>
+          <svg viewBox="0 0 600 230" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="lg" x1="0" x2="1"><stop offset="0" stop-color="#a78bfa"/><stop offset=".5" stop-color="#6366f1"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
+              <linearGradient id="ag" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#8b5cf6" stop-opacity=".45"/><stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/></linearGradient>
+            </defs>
+            <g stroke="rgba(255,255,255,.06)"><line x1="0" x2="600" y1="46" y2="46"/><line x1="0" x2="600" y1="92" y2="92"/><line x1="0" x2="600" y1="138" y2="138"/><line x1="0" x2="600" y1="184" y2="184"/></g>
+            <path class="area" id="areaPath"/>
+            <path class="line" id="linePath"/>
+          </svg>
+        </div>
+        <div class="feed" id="feed"><div class="ft">Incoming leads</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ROI ============ -->
+<section id="roi">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">💰 ROI Calculator</div>
+      <h2>How much will you <span class="grad-text">save?</span></h2>
+      <p>Move the sliders and see what automation means for your business</p>
+    </div>
+    <div class="roi">
+      <div class="card reveal">
+        <div class="field"><label>Sales reps on your team <output id="oReps">3</output></label><input type="range" id="reps" min="1" max="20" value="3"></div>
+        <div class="field"><label>Monthly cost per rep <output id="oCost">$2,000</output></label><input type="range" id="cost" min="800" max="6000" step="100" value="2000"></div>
+        <div class="field"><label>Leads lost after hours / month <output id="oLost">120</output></label><input type="range" id="lost" min="0" max="1000" step="10" value="120"></div>
+        <div class="field" style="margin-bottom:0"><label>Average deal value <output id="oDeal">$250</output></label><input type="range" id="deal" min="20" max="5000" step="10" value="250"></div>
+      </div>
+      <div class="card roi-result reveal" data-d="2">
+        <div class="sub">Your estimated yearly gain</div>
+        <div class="big" id="roiTotal">$0</div>
+        <div class="roi-split">
+          <div><b id="roiSave">$0</b><span>saved on payroll / year</span></div>
+          <div><b id="roiRev">$0</b><span>recovered revenue / year</span></div>
+        </div>
+        <a href="#pricing" class="btn btn-hot magnetic" style="justify-content:center">Start saving now <span class="arrow">→</span></a>
+        <div style="font-size:.78rem;color:var(--dim);margin-top:14px">Estimate assumes the AI agent handles ~70% of workload and converts 15% of recovered leads.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section id="how" style="padding-top:40px">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow teal">⚡ 3-Step Setup</div>
+      <h2>Launch in days, <span class="grad-text">not months</span></h2>
+    </div>
+    <div class="steps" id="steps">
+      <div class="steps-line"><i></i></div>
+      <div class="step reveal" data-d="1"><div class="n grad-text">1</div><h3>Connect channels</h3><p>Link Telegram, Instagram, WhatsApp, web chat and your CRM in a few clicks.</p></div>
+      <div class="step reveal" data-d="2"><div class="n grad-text">2</div><h3>Upload knowledge</h3><p>Add products, prices and FAQs to the RAG knowledge base — the AI learns instantly.</p></div>
+      <div class="step reveal" data-d="3"><div class="n grad-text">3</div><h3>Start selling</h3><p>The agent goes live, qualifies leads and hands hot deals to your team 24/7.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ REVIEWS ============ -->
+<!-- PLACEHOLDER: replace these sample reviews with real customer testimonials before publishing -->
+<section id="reviews">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">⭐ Reviews</div>
+      <h2>Businesses that <span class="grad-text">stopped losing leads</span></h2>
+    </div>
+  </div>
+  <div class="reviews-row"><div class="reviews-track" id="revA"></div></div>
+  <div class="reviews-row rev" style="margin-top:12px"><div class="reviews-track" id="revB"></div></div>
+</section>
+
+<!-- ============ PRICING ============ -->
+<!-- PLACEHOLDER: prices below are examples — set the real ones in the PLANS array in the script -->
+<section id="pricing">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">💎 Pricing</div>
+      <h2>Cheaper than <span class="hot-text">one sales rep</span></h2>
+      <p>Choose a plan. Cancel anytime. 14-day money-back guarantee.</p>
+      <div class="toggle" id="billing"><span class="knob"></span><button class="on" data-b="m">Monthly</button><button data-b="y">Yearly<span class="save">-20%</span></button></div>
+    </div>
+    <div class="pricing" id="plans"></div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="eyebrow">❓ FAQ</div>
+      <h2>Questions? <span class="grad-text">Answers.</span></h2>
+    </div>
+    <div class="faq" id="faqList"></div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section style="padding-top:40px">
+  <div class="container">
+    <div class="final reveal">
+      <div class="grid-bg"></div>
+      <div class="eyebrow"><span class="dot"></span>Setup in 3 steps</div>
+      <h2>Your next customer is writing<br><span class="grad-text">right now.</span></h2>
+      <p>Let AI answer in 30 seconds — while your competitors are still asleep.</p>
+      <a href="#pricing" class="btn btn-hot magnetic">Yes, I want to automate my sales! <span class="arrow">→</span></a>
+      <div class="guarantee">🛡️ 14-day money-back guarantee · 🔒 GDPR compliant · 💬 24/7 support</div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container foot">
+    <a href="#top" class="logo"><span class="logo-mark"></span><span class="grad-text">AgentSellerAI</span></a>
+    <nav><a href="#solution">Solution</a><a href="#modules">Modules</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a></nav>
+    <div>© <span id="year"></span> AgentSellerAI</div>
+  </div>
+</footer>
+
+<script>
+(() => {
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+$('#year').textContent = new Date().getFullYear();
+
+/* ---------- nav, progress, mobile menu ---------- */
+const nav = $('#nav'), prog = $('#progress');
+const sections = $$('section[id]');
+const links = $$('.nav-links a');
+function onScroll() {
+  const y = scrollY, h = document.documentElement.scrollHeight - innerHeight;
+  nav.classList.toggle('scrolled', y > 20);
+  prog.style.width = (h > 0 ? y / h * 100 : 0) + '%';
+  let cur = '';
+  sections.forEach(s => { if (s.offsetTop - 140 <= y) cur = s.id; });
+  links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
+}
+addEventListener('scroll', onScroll, { passive: true }); onScroll();
+const burger = $('#burger'), menu = $('#mobileMenu');
+burger.onclick = () => { burger.classList.toggle('open'); menu.classList.toggle('open'); document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : ''; };
+$$('a', menu).forEach(a => a.onclick = () => { burger.classList.remove('open'); menu.classList.remove('open'); document.body.style.overflow = ''; });
+
+/* ---------- reveal + counters ---------- */
+const countUp = el => {
+  const to = +el.dataset.to, dur = 1600, t0 = performance.now();
+  const tick = t => { const p = Math.min((t - t0) / dur, 1); el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(tick); };
+  reduce ? el.textContent = to : requestAnimationFrame(tick);
+};
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  e.target.classList.add('in');
+  $$('.count', e.target).forEach(countUp);
+  io.unobserve(e.target);
+}), { threshold: .15 });
+$$('.reveal, #chart, #steps').forEach(el => io.observe(el));
+
+/* ---------- cursor glow, spotlight cards, tilt, magnetic ---------- */
+const glow = $('#cursor-glow');
+const fine = matchMedia('(pointer:fine)').matches;
+if (fine && !reduce) {
+  addEventListener('pointermove', e => { glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px'; });
+  $$('.tilt').forEach(c => {
+    c.addEventListener('pointermove', e => {
+      const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+      c.style.transform = `perspective(900px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) translateY(-4px)`;
+    });
+    c.addEventListener('pointerleave', () => c.style.transform = '');
+  });
+  $$('.magnetic').forEach(b => {
+    b.addEventListener('pointermove', e => { const r = b.getBoundingClientRect(); b.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * .18}px,${(e.clientY - r.top - r.height / 2) * .3}px)`; });
+    b.addEventListener('pointerleave', () => b.style.transform = '');
+  });
+}
+document.addEventListener('pointermove', e => {
+  const c = e.target.closest && e.target.closest('.card'); if (!c) return;
+  const r = c.getBoundingClientRect();
+  c.style.setProperty('--mx', e.clientX - r.left + 'px'); c.style.setProperty('--my', e.clientY - r.top + 'px');
+});
+
+/* ---------- particles network ---------- */
+const cv = $('#particles'), ctx = cv.getContext('2d');
+let W, H, pts = [];
+function resize() {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  W = cv.width = innerWidth * dpr; H = cv.height = innerHeight * dpr;
+  cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px';
+  const n = Math.min(90, Math.floor(innerWidth * innerHeight / 16000));
+  pts = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .35 * dpr, vy: (Math.random() - .5) * .35 * dpr, r: (Math.random() * 1.6 + .4) * dpr }));
+}
+resize(); addEventListener('resize', resize);
+let mouse = { x: -9999, y: -9999 };
+addEventListener('pointermove', e => { const d = Math.min(devicePixelRatio || 1, 2); mouse = { x: e.clientX * d, y: e.clientY * d }; });
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  const link = 130 * Math.min(devicePixelRatio || 1, 2);
+  for (const p of pts) {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > W) p.vx *= -1; if (p.y < 0 || p.y > H) p.vy *= -1;
+    const dx = p.x - mouse.x, dy = p.y - mouse.y, dm = Math.hypot(dx, dy);
+    if (dm < 160) { p.x += dx / dm * 1.2; p.y += dy / dm * 1.2; }
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fillStyle = 'rgba(196,181,253,.8)'; ctx.fill();
+  }
+  for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
+    const a = pts[i], b = pts[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+    if (d < link) { ctx.strokeStyle = `rgba(139,92,246,${(1 - d / link) * .35})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+  }
+  requestAnimationFrame(draw);
+}
+if (!reduce) draw();
+
+/* ---------- rotating hero word (typewriter) ---------- */
+const words = ['sells', 'qualifies', 'closes', 'answers', 'sells'];
+const rot = $('#rotWord');
+if (!reduce) {
+  let wi = 0, ci = words[0].length, del = true;
+  setTimeout(function type() {
+    const w = words[wi];
+    if (del) { ci--; rot.textContent = w.slice(0, ci); if (ci === 0) { del = false; wi = (wi + 1) % words.length; } setTimeout(type, 55); }
+    else { const nw = words[wi]; ci++; rot.textContent = nw.slice(0, ci); if (ci === nw.length) { del = true; setTimeout(type, 2200); } else setTimeout(type, 95); }
+  }, 2600);
+}
+
+/* ---------- chat demo ---------- */
+const scripts = [
+  { ch: 0, msgs: [
+    ['user', 'Hi! Do you ship to Germany? 🇩🇪'],
+    ['bot', 'Hi! 👋 Yes — delivery to Germany takes 2-4 days, and it\'s free for orders over €80.'],
+    ['user', 'Great. I need 40 units for my shop, is there a wholesale price?'],
+    ['bot', 'Absolutely! For 40+ units you get 18% off. May I ask your shop name and when you\'d like to receive the order?'],
+    ['user', 'Berlin Goods, ideally next week'],
+    ['sys', '🔥 Hot lead → sent to CRM · BANT 92'],
+  ]},
+  { ch: 1, msgs: [
+    ['user', 'Hola, ¿cuánto cuesta el plan Pro?'],
+    ['bot', '¡Hola! 😊 El plan Pro cuesta $499/mes e incluye todos los canales y la integración con CRM.'],
+    ['user', '¿Tienen prueba gratuita?'],
+    ['bot', 'Sí — garantía de devolución de 14 días. ¿Quieres que te reserve una demo mañana a las 11:00?'],
+    ['sys', '📅 Demo booked · Calendar synced'],
+  ]},
+];
+const body = $('#chatBody'), chans = $$('#chatChannels span');
+const wait = ms => new Promise(r => setTimeout(r, ms));
+async function runChat() {
+  for (let s = 0; ; s = (s + 1) % scripts.length) {
+    body.innerHTML = '';
+    chans.forEach((c, i) => c.classList.toggle('on', i === scripts[s].ch));
+    for (const [who, text] of scripts[s].msgs) {
+      if (who === 'bot') {
+        const t = document.createElement('div'); t.className = 'msg bot typing'; t.innerHTML = '<i></i><i></i><i></i>';
+        body.appendChild(t); await wait(1100 + text.length * 8); t.remove();
+      }
+      const m = document.createElement('div'); m.className = 'msg ' + who; m.textContent = text;
+      body.appendChild(m);
+      while (body.scrollHeight > body.clientHeight && body.children.length > 1) body.firstElementChild.remove();
+      await wait(who === 'user' ? 900 : 1300);
+    }
+    await wait(3200);
+  }
+}
+if (reduce) scripts[0].msgs.forEach(([w, t]) => { const m = document.createElement('div'); m.className = 'msg ' + w; m.textContent = t; body.appendChild(m); });
+else runChat();
+
+/* ---------- dashboard: chart + live feed + kpis ---------- */
+const data = [18, 22, 20, 28, 26, 34, 31, 42, 40, 49, 47, 58, 63, 72];
+(() => {
+  const max = 80, w = 600, h = 220, step = w / (data.length - 1);
+  const P = data.map((v, i) => [i * step, h - v / max * h]);
+  let d = `M${P[0][0]},${P[0][1]}`;
+  for (let i = 1; i < P.length; i++) { const [x0, y0] = P[i - 1], [x1, y1] = P[i], cx = (x0 + x1) / 2; d += ` C${cx},${y0} ${cx},${y1} ${x1},${y1}`; }
+  $('#linePath').setAttribute('d', d);
+  $('#areaPath').setAttribute('d', d + ` L${w},${h + 10} L0,${h + 10} Z`);
+})();
+const names = [['🇩🇪', 'Lukas M.', 'Telegram'], ['🇪🇸', 'Sofía R.', 'Instagram'], ['🇫🇷', 'Camille D.', 'Web Chat'], ['🇺🇸', 'Jake P.', 'WhatsApp'], ['🇵🇱', 'Anna K.', 'Messenger'], ['🇮🇹', 'Marco B.', 'Instagram'], ['🇬🇧', 'Emma W.', 'Web Chat'], ['🇺🇦', 'Olena S.', 'Telegram']];
+const scores = [['hot', 'HOT'], ['warm', 'WARM'], ['cold', 'COLD'], ['hot', 'HOT']];
+const feed = $('#feed'); let ni = 0;
+function addLead() {
+  const [f, n, c] = names[ni++ % names.length], [sc, sl] = scores[Math.floor(Math.random() * scores.length)];
+  const el = document.createElement('div'); el.className = 'lead-item';
+  el.innerHTML = `<div class="av">${f}</div><div><div class="n">${n}</div><div class="c">via ${c} · just now</div></div><span class="score ${sc}">${sl}</span>`;
+  feed.insertBefore(el, feed.children[1]);
+  while (feed.children.length > 6) feed.lastElementChild.remove();
+}
+for (let i = 0; i < 4; i++) addLead();
+const kc = $('#kpiConv'), kl = $('#kpiLeads'); let conv = 1284, leads = 312;
+if (!reduce) setInterval(() => {
+  addLead(); conv += Math.ceil(Math.random() * 4); leads += Math.random() > .5 ? 1 : 0;
+  kc.textContent = conv.toLocaleString('en-US'); kl.textContent = leads;
+}, 2600);
+
+/* ---------- ROI calculator ---------- */
+const fmt = n => '$' + Math.round(n).toLocaleString('en-US');
+const inp = ['reps', 'cost', 'lost', 'deal'].reduce((o, k) => (o[k] = $('#' + k), o), {});
+let shown = 0;
+function animateTo(el, target) {
+  const from = shown, t0 = performance.now();
+  const tick = t => { const p = Math.min((t - t0) / 500, 1); const v = from + (target - from) * (1 - Math.pow(1 - p, 3)); el.textContent = fmt(v); if (p < 1) requestAnimationFrame(tick); else shown = target; };
+  requestAnimationFrame(tick);
+}
+function calc() {
+  Object.values(inp).forEach(i => i.style.setProperty('--p', (i.value - i.min) / (i.max - i.min) * 100 + '%'));
+  const reps = +inp.reps.value, cost = +inp.cost.value, lost = +inp.lost.value, deal = +inp.deal.value;
+  $('#oReps').textContent = reps; $('#oCost').textContent = fmt(cost); $('#oLost').textContent = lost; $('#oDeal').textContent = fmt(deal);
+  const save = reps * cost * 12 * .7, rev = lost * .15 * deal * 12;
+  $('#roiSave').textContent = fmt(save); $('#roiRev').textContent = fmt(rev);
+  animateTo($('#roiTotal'), save + rev);
+}
+Object.values(inp).forEach(i => i.addEventListener('input', calc)); calc();
+
+/* ---------- reviews (PLACEHOLDER content — replace with real testimonials) ---------- */
+const reviews = [
+  ['C', 'Client Name', 'E-commerce · Company', 'Replace this text with a real customer review. Short, specific results work best — e.g. response time or conversion change.'],
+  ['C', 'Client Name', 'Real estate · Company', 'Replace this text with a real customer review. Mention which channels they use and what changed after launch.'],
+  ['C', 'Client Name', 'Education · Company', 'Replace this text with a real customer review. A concrete number makes the testimonial more convincing.'],
+  ['C', 'Client Name', 'SaaS · Company', 'Replace this text with a real customer review. Keep it to 2-3 sentences for the carousel.'],
+  ['C', 'Client Name', 'Travel · Company', 'Replace this text with a real customer review. Add the customer\'s role and company for credibility.'],
+  ['C', 'Client Name', 'Beauty · Company', 'Replace this text with a real customer review before publishing the site.'],
+];
+const revHTML = list => list.map(([a, n, r, t]) => `<div class="card review"><div class="stars">★★★★★</div><p>${t}</p><div class="who"><div class="a">${a}</div><div><b>${n}</b><span>${r}</span></div></div></div>`).join('');
+const half = reviews.slice(0, 3), half2 = reviews.slice(3);
+$('#revA').innerHTML = revHTML([...half, ...half2, ...half, ...half2]);
+$('#revB').innerHTML = revHTML([...half2, ...half, ...half2, ...half]);
+
+/* ---------- pricing (PLACEHOLDER prices — set real ones here) ---------- */
+const PLANS = [
+  { name: 'Starter', desc: 'For small businesses getting started', m: 199, feats: ['1 AI sales agent', '2 channels', 'Up to 1,000 conversations / mo', 'RAG knowledge base', 'Email support'] },
+  { name: 'Pro', desc: 'The full system for growing teams', m: 499, pop: true, feats: ['Everything in Starter', 'All 6 channels', 'Unlimited conversations', 'CRM integration', 'AI monitoring & lead scoring', 'Email automation', '24/7 priority support'] },
+  { name: 'Enterprise', desc: 'Custom setup for large companies', m: null, feats: ['Everything in Pro', 'Multiple AI agents', 'Custom integrations', 'Dedicated manager', 'SLA & on-prem option'] },
+];
+const plansEl = $('#plans');
+plansEl.innerHTML = PLANS.map((p, i) => `
+  <div class="card plan ${p.pop ? 'pop' : ''} reveal" data-d="${i + 1}">
+    ${p.pop ? '<span class="ribbon">Most popular</span>' : ''}
+    <h3>${p.name}</h3><div class="desc">${p.desc}</div>
+    <div class="price">${p.m ? `<span class="val" data-m="${p.m}">$${p.m}</span><small>/ month</small>` : '<span class="val">Custom</span>'}</div>
+    <div class="billed" data-plan="${i}"></div>
+    <ul>${p.feats.map(f => `<li>${f}</li>`).join('')}</ul>
+    <a href="#" class="btn ${p.pop ? 'btn-hot' : 'btn-ghost'}">${p.m ? 'Get started' : 'Contact sales'} <span class="arrow">→</span></a>
+  </div>`).join('');
+$$('.reveal', plansEl).forEach(el => io.observe(el));
+const tg = $('#billing'), knob = $('.knob', tg), tbtns = $$('button', tg);
+function setBilling(b) {
+  tbtns.forEach(x => x.classList.toggle('on', x.dataset.b === b));
+  const on = tbtns.find(x => x.dataset.b === b);
+  knob.style.left = on.offsetLeft + 'px'; knob.style.width = on.offsetWidth + 'px';
+  $$('.price .val[data-m]', plansEl).forEach(v => {
+    const m = +v.dataset.m, val = b === 'y' ? Math.round(m * .8) : m;
+    v.classList.add('flip'); setTimeout(() => { v.textContent = '$' + val; v.classList.remove('flip'); }, 200);
+  });
+  $$('.billed', plansEl).forEach(el => {
+    const p = PLANS[+el.dataset.plan];
+    el.textContent = p.m ? (b === 'y' ? `Billed yearly: $${(Math.round(p.m * .8) * 12).toLocaleString('en-US')}` : 'Billed monthly') : 'Tailored to your volume';
+  });
+}
+tbtns.forEach(x => x.onclick = () => setBilling(x.dataset.b));
+addEventListener('resize', () => setBilling($('button.on', tg).dataset.b));
+setBilling('m');
+
+/* ---------- FAQ ---------- */
+const faqs = [
+  ['How long does setup take?', 'Setup takes 3 steps: connect your channels, upload your product knowledge, and go live. Most businesses launch within a few days.'],
+  ['Will customers know they are talking to AI?', 'The agent communicates naturally in your brand\'s tone. You decide whether to disclose AI — and hot leads can always be handed to a human.'],
+  ['Which languages are supported?', 'The agent speaks 11 languages out of the box, including English, German, Spanish, French and more, and automatically replies in the customer\'s language.'],
+  ['Does it integrate with my CRM?', 'Yes — HubSpot, Pipedrive and Salesforce are supported. Deals and contacts are created automatically with full dialogue history.'],
+  ['Is my data safe?', 'The system is fully GDPR compliant: consent management, right to deletion, data export and audit logs. Access is protected with JWT and role-based permissions.'],
+  ['What if it doesn\'t work for my business?', 'You\'re covered by our 14-day money-back guarantee. If you\'re not satisfied, you get a full refund.'],
+];
+const fl = $('#faqList');
+fl.innerHTML = faqs.map(([q, a], i) => `<div class="qa reveal" data-d="${Math.min(i + 1, 5)}"><button aria-expanded="false">${q}<span class="pm"></span></button><div class="ans"><div><p>${a}</p></div></div></div>`).join('');
+$$('.qa', fl).forEach(qa => {
+  io.observe(qa);
+  $('button', qa).onclick = () => {
+    const open = !qa.classList.contains('open');
+    $$('.qa', fl).forEach(x => { x.classList.remove('open'); $('button', x).setAttribute('aria-expanded', 'false'); });
+    if (open) { qa.classList.add('open'); $('button', qa).setAttribute('aria-expanded', 'true'); }
+  };
+});
+})();
+</script>
+</body>
+</html>
